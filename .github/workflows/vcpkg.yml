@@ -1,0 +1,72 @@
+name: Vcpkg Build
+
+on:
+  # 每个月 1 号 0 点
+  schedule:
+    - cron: '0 0 1 * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - windows-2019
+          - windows-2022
+          - macos-11
+          - macos-12
+          - ubuntu-20.04
+          - ubuntu-22.04
+        libs:
+          - vulkan-hpp glm glfw3 stb glad[extensions] openssl[tools] curl[openssl,brotli,c-ares,http2,tool] protobuf benchmark gtest glog breakpad giflib
+        ffmpeg:
+          - opengl,ass,bzip2,freetype,fribidi,zlib,gpl,ffmpeg,ffplay,ffprobe
+
+    steps:
+      - name: Install dependencies on windows
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          choco install ninja
+          ninja --version
+          cmake --version
+          vcpkg install ${{ matrix.libs }}  ffmpeg[${{ matrix.ffmpeg }},amf,nvcodec,qsv] --triplet x64-windows
+
+      - name: Install dependencies on macos
+        if: startsWith(matrix.os, 'macos')
+        shell: bash
+        run: |
+          brew install ninja nasm pkg-config
+          ninja --version
+          cmake --version
+          clang --version
+          vcpkg install ${{ matrix.libs }} ffmpeg[${{ matrix.ffmpeg }}] --triplet x64-osx
+
+      - name: Install dependencies on ubuntu
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          sudo apt-get update
+          sudo apt-get install ninja-build nasm build-essential libgl1-mesa-dev libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev pkg-config
+          ninja --version
+          cmake --version
+          gcc --version
+          vcpkg install ${{ matrix.libs }} ffmpeg[${{ matrix.ffmpeg }},amf,nvcodec] --triplet x64-linux
+
+      - name: 7-zip windows vcpkg installed
+        if: startsWith(matrix.os, 'windows')
+        shell: bash
+        run: |
+          7z a -t7z -r -mx=9 -mmt ${{ matrix.os }}-vcpkg-installed.7z C:/vcpkg/installed
+      - name: 7-zip macos or ubuntu vcpkg installed
+        if: startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu')
+        shell: bash
+        run: |
+          7z a -t7z -r -mx=9 -mmt ${{ matrix.os }}-vcpkg-installed.7z /usr/local/share/vcpkg/installed
+      
+      - name: Upload vcpkg installed
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.os }}-vcpkg-installed
+          path: ${{ matrix.os }}-vcpkg-installed.7z

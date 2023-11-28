@@ -1,0 +1,15 @@
+{
+    "name": "manifest",
+    "version": "0.0.1",
+    "description": "manifest mode test",
+    "dependencies": [
+        "openssl"
+    ],
+    "overrides": [
+        {
+            "name": "openssl",
+            "version-string": "1.1.1h#5"
+        }
+    ],
+    "builtin-baseline": "9c2fc5d3518bb7f729754b23440695f9c595576a"
+}

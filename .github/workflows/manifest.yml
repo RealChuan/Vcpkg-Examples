@@ -1,0 +1,96 @@
+name: Vcpkg Manifest
+
+on: 
+  # push代码时触发workflow
+  push:
+    paths-ignore: # 下列文件的变更不触发部署，可以自行添加
+        - '.github/workflows/delete_workflow.yml'
+        - '.github/workflows/readme.yml'
+        - '.github/workflows/vcpkg.yml'
+        - '.gitignore'
+        - 'LICENSE'
+        - 'README*'
+  pull_request:
+    paths-ignore: # 下列文件的变更不触发部署，可以自行添加
+        - '.github/workflows/delete_workflow.yml'
+        - '.github/workflows/readme.yml'
+        - '.github/workflows/vcpkg.yml'
+        - '.gitignore'
+        - 'LICENSE'
+        - 'README*'
+
+jobs:
+  build:
+    name: Build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - windows-2019
+          - windows-2022
+          - macos-11
+          - macos-12
+          - ubuntu-20.04
+          - ubuntu-22.04
+        build_type:
+          - "Release"
+        generators:
+          - "Ninja"
+
+    steps:
+      - name: Install dependencies on windows
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          choco install ninja
+          ninja --version
+          cmake --version
+      - name: Install dependencies on macos
+        if: startsWith(matrix.os, 'macos')
+        shell: bash
+        run: |
+          brew install ninja
+          ninja --version
+          cmake --version
+          clang --version
+      - name: Install dependencies on ubuntu
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          sudo apt-get update
+          sudo apt-get install ninja-build
+          ninja --version
+          cmake --version
+          gcc --version
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Enable Developer Command Prompt
+        if: startsWith(matrix.os, 'windows')
+        uses: ilammy/msvc-dev-cmd@v1.12.1
+        with:
+          arch: amd64
+      - name: Configure windows
+        if: startsWith(matrix.os, 'windows')
+        shell: bash
+        run: |
+          cmake \
+            -S . \
+            -B ./build \
+            -DCMAKE_C_COMPILER=cl \
+            -DCMAKE_CXX_COMPILER=cl \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -G "${{ matrix.generators }}" \
+            -DCMAKE_INSTALL_PREFIX:PATH=instdir
+      - name: Configure macos or ubuntu
+        if: startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu')
+        shell: bash
+        run: |
+          cmake \
+            -S . \
+            -B ./build \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -G "${{ matrix.generators }}" \
+            -DCMAKE_INSTALL_PREFIX:PATH=instdir
+          
