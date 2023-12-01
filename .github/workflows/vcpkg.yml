@@ -38,7 +38,7 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         shell: bash
         run: |
-          brew install ninja nasm pkg-config
+          brew install ninja nasm
           ninja --version
           cmake --version
           clang --version
@@ -48,7 +48,8 @@ jobs:
         if: startsWith(matrix.os, 'ubuntu')
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build nasm build-essential libgl1-mesa-dev libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev pkg-config
+          sudo apt-get install ninja-build nasm autopoint gperf libgl1-mesa-dev \
+            libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev      
           ninja --version
           cmake --version
           gcc --version
