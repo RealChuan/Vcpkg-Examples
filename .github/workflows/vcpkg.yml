@@ -14,12 +14,12 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - windows-2019
-          - windows-2022
-          - macos-11
-          - macos-12
-          - ubuntu-20.04
           - ubuntu-22.04
+          - ubuntu-20.04
+          - macos-13
+          - macos-12
+          - windows-2022
+          - windows-2019
         libs:
           - vulkan-hpp glm glfw3 stb glad[extensions] openssl[tools] curl[openssl,brotli,c-ares,http2,tool] protobuf benchmark gtest glog breakpad giflib
         ffmpeg:
@@ -43,6 +43,7 @@ jobs:
           cmake --version
           clang --version
           vcpkg install ${{ matrix.libs }} ffmpeg[${{ matrix.ffmpeg }}] --triplet x64-osx
+          vcpkg install ${{ matrix.libs }} ffmpeg[${{ matrix.ffmpeg }}] --triplet arm64-osx
 
       - name: Install dependencies on ubuntu
         if: startsWith(matrix.os, 'ubuntu')
