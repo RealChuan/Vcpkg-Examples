@@ -1,74 +1,75 @@
 {
-    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
-    "name": "manifest",
-    "version": "0.0.1",
-    "description": "manifest mode test",
-    "dependencies": [
-        "vulkan-hpp",
-        "glm",
-        "glfw3",
-        "stb",
-        "protobuf",
-        "benchmark",
-        "breakpad",
-        "gtest",
-        "glog",
-        "giflib",
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "manifest",
+  "version": "0.0.1",
+  "description": "manifest mode test",
+  "dependencies": [
+    "vulkan-hpp",
+    "glm",
+    "glfw3",
+    "stb",
+    "protobuf",
+    "benchmark",
+    "breakpad",
+    "crashpad",
+    "gtest",
+    "glog",
+    "giflib",
+    {
+      "name": "glad",
+      "features": [
+        "extensions"
+      ]
+    },
+    {
+      "name": "openssl",
+      "features": [
+        "tools"
+      ]
+    },
+    {
+      "name": "curl",
+      "features": [
+        "openssl",
+        "brotli",
+        "c-ares",
+        "http2",
+        "tool"
+      ]
+    },
+    {
+      "name": "ffmpeg",
+      "features": [
+        "opengl",
+        "ass",
+        "bzip2",
+        "freetype",
+        "fribidi",
+        "zlib",
+        "gpl",
+        "ffmpeg",
+        "ffplay",
+        "ffprobe",
         {
-            "name": "glad",
-            "features": [
-                "extensions"
-            ]
+          "name": "qsv",
+          "platform": "windows"
         },
         {
-            "name": "openssl",
-            "features": [
-                "tools"
-            ]
+          "name": "amf",
+          "platform": "windows | linux"
         },
         {
-            "name": "curl",
-            "features": [
-                "openssl",
-                "brotli",
-                "c-ares",
-                "http2",
-                "tool"
-            ]
-        },
-        {
-            "name": "ffmpeg",
-            "features": [
-                "opengl",
-                "ass",
-                "bzip2",
-                "freetype",
-                "fribidi",
-                "zlib",
-                "gpl",
-                "ffmpeg",
-                "ffplay",
-                "ffprobe",
-                {
-                    "name": "qsv",
-                    "platform": "windows"
-                },
-                {
-                    "name": "amf",
-                    "platform": "windows | linux"
-                },
-                {
-                    "name": "nvcodec",
-                    "platform": "windows | linux"
-                }
-            ]
+          "name": "nvcodec",
+          "platform": "windows | linux"
         }
-    ],
-    "overrides": [
-        {
-            "name": "openssl",
-            "version-string": "3.1.2"
-        }
-    ],
-    "builtin-baseline": "3c76dc55f8bd2b7f4824bcd860055094bfbbb9ea"
+      ]
+    }
+  ],
+  "overrides": [
+    {
+      "name": "openssl",
+      "version-string": "3.4.0"
+    }
+  ],
+  "builtin-baseline": "5f4628b89f3f98cd9a0b43c27ded2aa53da1f790"
 }

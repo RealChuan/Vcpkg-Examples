@@ -1,20 +1,13 @@
 name: Vcpkg manifest
 
 on: 
-  # push代码时触发workflow
   push:
-    paths-ignore: # 下列文件的变更不触发部署，可以自行添加
-        - '.github/workflows/delete_workflow.yml'
-        - '.github/workflows/readme.yml'
-        - '.github/workflows/vcpkg.yml'
+    paths-ignore:
         - '.gitignore'
         - 'LICENSE'
         - 'README*'
   pull_request:
-    paths-ignore: # 下列文件的变更不触发部署，可以自行添加
-        - '.github/workflows/delete_workflow.yml'
-        - '.github/workflows/readme.yml'
-        - '.github/workflows/vcpkg.yml'
+    paths-ignore:
         - '.gitignore'
         - 'LICENSE'
         - 'README*'
@@ -46,7 +39,7 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         shell: bash
         run: |
-          brew install ninja nasm
+          brew install ninja nasm python-setuptools
           ninja --version
           cmake --version
           clang --version
@@ -64,28 +57,25 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Install custom vcpkg
+        uses: RealChuan/install-vcpkg@main
+
       - name: Update vcpkg manifest baseline
         shell: bash
         run: |
           vcpkg x-update-baseline
 
-      - name: Enable Developer Command Prompt
-        if: startsWith(matrix.os, 'windows')
-        uses: ilammy/msvc-dev-cmd@v1.12.1
-        with:
-          arch: amd64
       - name: Configure windows
         if: startsWith(matrix.os, 'windows')
-        shell: bash
+        shell: pwsh
         run: |
-          cmake \
-            -S . \
-            -B ./build \
-            -DCMAKE_C_COMPILER=cl \
-            -DCMAKE_CXX_COMPILER=cl \
-            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-            -G "${{ matrix.generators }}" \
-            -DCMAKE_INSTALL_PREFIX:PATH=instdir
+          .\scripts\windows\setVsDev.ps1
+          cmake `
+            -S . `
+            -B ./build `
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
+            -G "${{ matrix.generators }}" `
+            ; if (-not $?) { Get-Content ./build/vcpkg_installed/vcpkg/issue_body.md; exit 1 }
       - name: Configure macos or ubuntu
         if: startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu')
         shell: bash
@@ -95,4 +85,25 @@ jobs:
             -B ./build \
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
             -G "${{ matrix.generators }}" \
-            -DCMAKE_INSTALL_PREFIX:PATH=instdir
+            || (cat ./build/vcpkg_installed/vcpkg/issue_body.md && exit 1)
+
+      - name: 7-zip windows vcpkg
+        if: startsWith(matrix.os, 'windows')
+        shell: bash
+        run: |
+          7z a -t7z -r -mx=9 -mmt ${{ matrix.os }}-vcpkg-installed.7z ./build/vcpkg_installed
+          7z a -t7z -r -mx=9 -mmt ${{ matrix.os }}-vcpkg-downloads.7z C:/vcpkg/downloads
+      - name: 7-zip macos or ubuntu vcpkg
+        if: startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu')
+        shell: bash
+        run: |
+          7z a -t7z -r -mx=9 -mmt ${{ matrix.os }}-vcpkg-installed.7z ./build/vcpkg_installed
+          7z a -t7z -r -mx=9 -mmt ${{ matrix.os }}-vcpkg-downloads.7z /usr/local/share/vcpkg/downloads
+      
+      - name: Upload vcpkg
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}-vcpkg
+          path: |
+            ${{ matrix.os }}-vcpkg-installed.7z
+            ${{ matrix.os }}-vcpkg-downloads.7z
