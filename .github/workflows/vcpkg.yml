@@ -23,7 +23,7 @@ jobs:
         libs:
           - vulkan-hpp glm glfw3 stb glad[extensions] openssl[tools] curl[openssl,brotli,c-ares,http2,tool] protobuf benchmark gtest glog breakpad crashpad giflib
         ffmpeg:
-          - opengl,ass,bzip2,freetype,fribidi,zlib,gpl,ffmpeg,ffplay,ffprobe
+          - opengl,ass,bzip2,freetype,fribidi,zlib,x265,gpl,ffmpeg,ffplay,ffprobe
 
     steps:
       - name: Install custom vcpkg
