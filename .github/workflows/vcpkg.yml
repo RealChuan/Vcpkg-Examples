@@ -21,9 +21,9 @@ jobs:
           - windows-2022
           - windows-2019
         libs:
-          - vulkan-hpp glm glfw3 stb glad[extensions] openssl[tools] curl[openssl,brotli,c-ares,http2,tool] protobuf benchmark gtest glog breakpad crashpad giflib
+          - breakpad benchmark crashpad efsw giflib glfw3 glm glog gtest protobuf stb vulkan-hpp curl[openssl,brotli,c-ares,http2,tool] glad[extensions] openssl[tools]
         ffmpeg:
-          - opengl,ass,bzip2,freetype,fribidi,zlib,gpl,ffmpeg,ffplay,ffprobe
+          - ass,bzip2,ffmpeg,ffplay,ffprobe,freetype,fribidi,gpl,opengl,x264,x265,zlib
 
     steps:
       - name: Install custom vcpkg
