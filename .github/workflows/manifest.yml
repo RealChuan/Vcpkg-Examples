@@ -39,7 +39,7 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         shell: bash
         run: |
-          brew install ninja nasm python-setuptools
+          brew install nasm python-setuptools
           ninja --version
           cmake --version
           clang --version
@@ -48,7 +48,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install ninja-build nasm autopoint gperf libgl1-mesa-dev \
-            libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev
+            libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev libltdl-dev
           ninja --version
           cmake --version
           gcc --version
@@ -97,8 +97,8 @@ jobs:
         if: startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu')
         shell: bash
         run: |
-          7z a -t7z -r -mx=9 -mmt ${{ matrix.os }}-vcpkg-installed.7z ./build/vcpkg_installed
-          7z a -t7z -r -mx=9 -mmt ${{ matrix.os }}-vcpkg-downloads.7z /usr/local/share/vcpkg/downloads
+          7z a -t7z -r -mx=9 -mmt -snl ${{ matrix.os }}-vcpkg-installed.7z ./build/vcpkg_installed
+          7z a -t7z -r -mx=9 -mmt -snl ${{ matrix.os }}-vcpkg-downloads.7z /usr/local/share/vcpkg/downloads
       
       - name: Upload vcpkg
         uses: actions/upload-artifact@v4

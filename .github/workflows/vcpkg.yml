@@ -18,12 +18,12 @@ jobs:
           - ubuntu-22.04
           - macos-15
           - macos-14
+          - windows-2025
           - windows-2022
-          - windows-2019
         libs:
-          - vulkan-hpp glm glfw3 stb glad[extensions] openssl[tools] curl[openssl,brotli,c-ares,http2,tool] protobuf benchmark gtest glog breakpad crashpad giflib
+          - breakpad benchmark crashpad efsw giflib glfw3 glm glog gtest protobuf stb vulkan-hpp curl[openssl,brotli,c-ares,http2,tool] glad[extensions] openssl[tools]
         ffmpeg:
-          - opengl,ass,bzip2,freetype,fribidi,zlib,gpl,ffmpeg,ffplay,ffprobe
+          - ass,bzip2,ffmpeg,ffplay,ffprobe,freetype,fribidi,gpl,opengl,x264,x265,zlib
 
     steps:
       - name: Install custom vcpkg
@@ -43,12 +43,10 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         shell: bash
         run: |
-          brew install ninja nasm python-setuptools
+          brew install nasm python-setuptools
           ninja --version
           cmake --version
           clang --version
-          vcpkg install ${{ matrix.libs }} ffmpeg[${{ matrix.ffmpeg }}] --triplet x64-osx \
-            || (cat /usr/local/share/vcpkg/installed/vcpkg/issue_body.md && exit 1)
           vcpkg install ${{ matrix.libs }} ffmpeg[${{ matrix.ffmpeg }}] --triplet arm64-osx \
             || (cat /usr/local/share/vcpkg/installed/vcpkg/issue_body.md && exit 1)
 
@@ -74,8 +72,8 @@ jobs:
         if: startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu')
         shell: bash
         run: |
-          7z a -t7z -r -mx=9 -mmt ${{ matrix.os }}-vcpkg-installed.7z /usr/local/share/vcpkg/installed
-          7z a -t7z -r -mx=9 -mmt ${{ matrix.os }}-vcpkg-downloads.7z /usr/local/share/vcpkg/downloads
+          7z a -t7z -r -mx=9 -mmt -snl ${{ matrix.os }}-vcpkg-installed.7z /usr/local/share/vcpkg/installed
+          7z a -t7z -r -mx=9 -mmt -snl ${{ matrix.os }}-vcpkg-downloads.7z /usr/local/share/vcpkg/downloads
       
       - name: Upload vcpkg
         uses: actions/upload-artifact@v4
