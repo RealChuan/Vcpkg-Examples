@@ -13,9 +13,8 @@
     "glm",
     "glog",
     "gtest",
-    "protobuf",
+    "opencv",
     "stb",
-    "vulkan-hpp",
     {
       "name": "curl",
       "features": [
