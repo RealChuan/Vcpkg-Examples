@@ -13,9 +13,7 @@
     "glm",
     "glog",
     "gtest",
-    "protobuf",
     "stb",
-    "vulkan-hpp",
     {
       "name": "curl",
       "features": [
@@ -59,6 +57,21 @@
       "name": "glad",
       "features": [
         "extensions"
+      ]
+    },
+    {
+      "name": "opencv",
+      "features": [
+        "contrib",
+        "thread",
+        {
+          "name": "openmp",
+          "platform": "windows | linux"
+        },
+        {
+          "name": "tbb",
+          "platform": "windows"
+        }
       ]
     },
     {

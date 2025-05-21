@@ -21,7 +21,7 @@ jobs:
           - windows-2025
           - windows-2022
         libs:
-          - breakpad benchmark crashpad efsw giflib glfw3 glm glog gtest protobuf stb vulkan-hpp curl[openssl,brotli,c-ares,http2,tool] glad[extensions] openssl[tools]
+          - breakpad benchmark crashpad efsw giflib glfw3 glm glog gtest opencv[contrib,thread] stb curl[openssl,brotli,c-ares,http2,tool] glad[extensions] openssl[tools]
         ffmpeg:
           - ass,bzip2,ffmpeg,ffplay,ffprobe,freetype,fribidi,gpl,opengl,x264,x265,zlib
 
