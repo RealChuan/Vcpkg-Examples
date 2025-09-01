@@ -21,7 +21,7 @@ jobs:
           - windows-2025
           - windows-2022
         libs:
-          - breakpad benchmark crashpad efsw giflib glfw3 glm glog gtest protobuf stb vulkan-hpp curl[openssl,brotli,c-ares,http2,tool] glad[extensions] openssl[tools]
+          - breakpad benchmark crashpad efsw giflib glfw3 glm glog gtest stb tl-expected curl[openssl,brotli,c-ares,http2,tool] glad[extensions] opencv[contrib,thread] openssl[tools]
         ffmpeg:
           - ass,bzip2,ffmpeg,ffplay,ffprobe,freetype,fribidi,gpl,opengl,x264,x265,zlib
 
@@ -37,6 +37,7 @@ jobs:
           ninja --version
           cmake --version
           vcpkg install ${{ matrix.libs }} ffmpeg[${{ matrix.ffmpeg }},amf,nvcodec,qsv] --triplet x64-windows \
+            --clean-buildtrees-after-build --clean-packages-after-build \
             || (cat C:/vcpkg/installed/vcpkg/issue_body.md && exit 1)
 
       - name: Install dependencies on macos
@@ -48,6 +49,7 @@ jobs:
           cmake --version
           clang --version
           vcpkg install ${{ matrix.libs }} ffmpeg[${{ matrix.ffmpeg }}] --triplet arm64-osx \
+            --clean-buildtrees-after-build --clean-packages-after-build \
             || (cat /usr/local/share/vcpkg/installed/vcpkg/issue_body.md && exit 1)
 
       - name: Install dependencies on ubuntu
@@ -60,6 +62,7 @@ jobs:
           cmake --version
           gcc --version
           vcpkg install ${{ matrix.libs }} ffmpeg[${{ matrix.ffmpeg }},amf,nvcodec] --triplet x64-linux \
+            --clean-buildtrees-after-build --clean-packages-after-build \
             || (cat /usr/local/share/vcpkg/installed/vcpkg/issue_body.md && exit 1)
 
       - name: 7-zip windows vcpkg
