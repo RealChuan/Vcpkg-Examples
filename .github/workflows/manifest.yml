@@ -53,7 +53,7 @@ jobs:
           cmake --version
           gcc --version
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 1
 
@@ -69,7 +69,7 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         shell: pwsh
         run: |
-          .\scripts\windows\setVsDev.ps1
+          .\packaging\windows\Enter-VsDevShell.ps1
           cmake `
             -S . `
             -B ./build `
@@ -91,19 +91,16 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         shell: bash
         run: |
-          7z a -t7z -r -mx=9 -mmt ${{ matrix.os }}-vcpkg-installed.7z ./build/vcpkg_installed
-          7z a -t7z -r -mx=9 -mmt ${{ matrix.os }}-vcpkg-downloads.7z C:/vcpkg/downloads
+          7z a -t7z -mx=9 -mmt ${{ matrix.os }}-vcpkg-downloads.7z C:/vcpkg/downloads
       - name: 7-zip macos or ubuntu vcpkg
         if: startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu')
         shell: bash
         run: |
-          7z a -t7z -r -mx=9 -mmt -snl ${{ matrix.os }}-vcpkg-installed.7z ./build/vcpkg_installed
-          7z a -t7z -r -mx=9 -mmt -snl ${{ matrix.os }}-vcpkg-downloads.7z /usr/local/share/vcpkg/downloads
+          7z a -t7z -mx=9 -mmt -snl ${{ matrix.os }}-vcpkg-downloads.7z /usr/local/share/vcpkg/downloads
       
       - name: Upload vcpkg
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}-vcpkg
           path: |
-            ${{ matrix.os }}-vcpkg-installed.7z
             ${{ matrix.os }}-vcpkg-downloads.7z
