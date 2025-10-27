@@ -77,7 +77,7 @@ jobs:
           7z a -t7z -mx=9 -mmt -snl ${{ matrix.os }}-vcpkg-downloads.7z /usr/local/share/vcpkg/downloads
       
       - name: Upload vcpkg
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ${{ matrix.os }}-vcpkg
           path: |
