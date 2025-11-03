@@ -1,10 +1,15 @@
-name: Vcpkg Build
+name: Vcpkg Downloads Cache Builder
 
 on:
-  # 每个月 1 号 0 点
+  # 每周一凌晨触发
   schedule:
-    - cron: '0 0 1 * *'
+    - cron: '0 0 * * 1'
   workflow_dispatch:
+
+env:
+  VCPKG_LIBS: "breakpad benchmark crashpad efsw freeimage giflib glfw3 glm glog gtest stb tl-expected curl[openssl,brotli,c-ares,http2,tool] glad[extensions] openssl[tools]"
+  VCPKG_FFMPEG: "ass,bzip2,ffmpeg,ffplay,ffprobe,freetype,fribidi,gpl,opengl,x264,x265,zlib"
+  VCPKG_OPENCV: "contrib,thread"
 
 jobs:
   build:
@@ -20,10 +25,6 @@ jobs:
           - macos-14
           - windows-2025
           - windows-2022
-        libs:
-          - breakpad benchmark crashpad efsw giflib glfw3 glm glog gtest protobuf stb vulkan-hpp curl[openssl,brotli,c-ares,http2,tool] glad[extensions] openssl[tools]
-        ffmpeg:
-          - ass,bzip2,ffmpeg,ffplay,ffprobe,freetype,fribidi,gpl,opengl,x264,x265,zlib
 
     steps:
       - name: Install custom vcpkg
@@ -36,8 +37,11 @@ jobs:
           choco install ninja
           ninja --version
           cmake --version
-          vcpkg install ${{ matrix.libs }} ffmpeg[${{ matrix.ffmpeg }},amf,nvcodec,qsv] --triplet x64-windows \
-            || (cat C:/vcpkg/installed/vcpkg/issue_body.md && exit 1)
+          vcpkg install ${{ env.VCPKG_LIBS }}  \
+            ffmpeg[${{ env.VCPKG_FFMPEG }},amf,nvcodec,qsv] \
+            opencv[${{ env.VCPKG_OPENCV }},openmp,tbb] \
+            --triplet x64-windows \
+            --only-downloads
 
       - name: Install dependencies on macos
         if: startsWith(matrix.os, 'macos')
@@ -47,38 +51,42 @@ jobs:
           ninja --version
           cmake --version
           clang --version
-          vcpkg install ${{ matrix.libs }} ffmpeg[${{ matrix.ffmpeg }}] --triplet arm64-osx \
-            || (cat /usr/local/share/vcpkg/installed/vcpkg/issue_body.md && exit 1)
+          vcpkg install ${{ env.VCPKG_LIBS }} \
+            ffmpeg[${{ env.VCPKG_FFMPEG }}] \
+            opencv[${{ env.VCPKG_OPENCV }}] \
+            --triplet arm64-osx \
+            --only-downloads
 
       - name: Install dependencies on ubuntu
         if: startsWith(matrix.os, 'ubuntu')
         run: |
           sudo apt-get update
           sudo apt-get install ninja-build nasm autopoint gperf libgl1-mesa-dev \
-            libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev libltdl-dev
+            libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev libltdl-dev \
+            autoconf autoconf-archive automake libtool
           ninja --version
           cmake --version
           gcc --version
-          vcpkg install ${{ matrix.libs }} ffmpeg[${{ matrix.ffmpeg }},amf,nvcodec] --triplet x64-linux \
-            || (cat /usr/local/share/vcpkg/installed/vcpkg/issue_body.md && exit 1)
+          vcpkg install ${{ env.VCPKG_LIBS }} \
+            ffmpeg[${{ env.VCPKG_FFMPEG }},amf,nvcodec] \
+            opencv[${{ env.VCPKG_OPENCV }},openmp] \
+            --triplet x64-linux \
+            --only-downloads
 
       - name: 7-zip windows vcpkg
         if: startsWith(matrix.os, 'windows')
         shell: bash
         run: |
-          7z a -t7z -r -mx=9 -mmt ${{ matrix.os }}-vcpkg-installed.7z C:/vcpkg/installed
-          7z a -t7z -r -mx=9 -mmt ${{ matrix.os }}-vcpkg-downloads.7z C:/vcpkg/downloads
+          7z a -t7z -mx=9 -mmt ${{ matrix.os }}-vcpkg-downloads.7z C:/vcpkg/downloads
       - name: 7-zip macos or ubuntu vcpkg
         if: startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu')
         shell: bash
         run: |
-          7z a -t7z -r -mx=9 -mmt -snl ${{ matrix.os }}-vcpkg-installed.7z /usr/local/share/vcpkg/installed
-          7z a -t7z -r -mx=9 -mmt -snl ${{ matrix.os }}-vcpkg-downloads.7z /usr/local/share/vcpkg/downloads
+          7z a -t7z -mx=9 -mmt -snl ${{ matrix.os }}-vcpkg-downloads.7z /usr/local/share/vcpkg/downloads
       
       - name: Upload vcpkg
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ${{ matrix.os }}-vcpkg
           path: |
-            ${{ matrix.os }}-vcpkg-installed.7z
             ${{ matrix.os }}-vcpkg-downloads.7z
